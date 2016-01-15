@@ -2,7 +2,7 @@ sudo: required
 dist: trusty
 language: cpp
 cache:
-  - directories:
+  directories:
     - $HOME/ccache
 matrix:
   include:
