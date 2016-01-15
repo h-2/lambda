@@ -12,7 +12,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9', 'cmake', 'zlib1g-dev', 'libbz2-dev']
-      install: export PATH="/usr/lib/ccache:${PATH}" CXX="g++-4.9" CC="gcc-4.9"'
+      install: export PATH="/usr/lib/ccache:${PATH}" CXX="g++-4.9" CC="gcc-4.9"
       before_script:
         - sudo dd if=/dev/zero of=/swapfile bs=64M count=32 # cheat us some extra MEM
         - sudo mkswap /swapfile
