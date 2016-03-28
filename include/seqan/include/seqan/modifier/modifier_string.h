@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -883,6 +883,14 @@ save(StringSet<ModifiedString<THost, TSpec>, Owner<ConcatDirect<TSpec2> > > cons
 {
     return true; // NOOP; this has to be done manually right now
 }
+
+// --------------------------------------------------------------------------
+// Function clear()
+// --------------------------------------------------------------------------
+
+template <typename THost, typename TSpec >
+inline void clear(ModifiedString<THost, TSpec> &)
+{}
 
 }  // namespace seqan
 

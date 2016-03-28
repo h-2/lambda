@@ -60,7 +60,8 @@ struct Options
     Pair<CharString>    readsFile;
     CharString          outputFile;
     TOutputFormat       outputFormat;
-    bool                outputSecondary;
+    SecondaryAlignments secondaryAlignments;
+    TList               secondaryAlignmentsList;
     bool                uncompressedBam;
     CharString          readGroup;
 
@@ -68,13 +69,15 @@ struct Options
     float               errorRate;
     float               indelRate;
     float               strataRate;
-    bool                quick;
+    Sensitivity         sensitivity;
+    TList               sensitivityList;
 
     bool                singleEnd;
     unsigned            libraryLength;
     unsigned            libraryDev;
-    LibraryOrientation  libraryOrientation;
-    TList               libraryOrientationList;
+//    LibraryOrientation  libraryOrientation;
+//    TList               libraryOrientationList;
+    bool                verifyMatches;
 
     unsigned            readsCount;
     unsigned            threadsCount;
@@ -89,28 +92,39 @@ struct Options
         contigsSize(),
         contigsMaxLength(),
         contigsSum(),
-        outputSecondary(false),
+        secondaryAlignments(TAG),
         uncompressedBam(false),
         readGroup("none"),
         mappingMode(STRATA),
         errorRate(0.05f),
         indelRate(0.25f),
         strataRate(0.00f),
-        quick(false),
+        sensitivity(HIGH),
         singleEnd(true),
         libraryLength(),
         libraryDev(),
-        libraryOrientation(FWD_REV),
-//        anchorOne(false),
+//        libraryOrientation(FWD_REV),
+        verifyMatches(true),
         readsCount(100000),
         threadsCount(1),
         hitsThreshold(300),
         rabema(false),
         verbose(0)
     {
-        appendValue(libraryOrientationList, "fwd-rev");
-        appendValue(libraryOrientationList, "fwd-fwd");
-        appendValue(libraryOrientationList, "rev-rev");
+#ifdef _OPENMP
+        threadsCount = std::thread::hardware_concurrency();
+#endif
+        appendValue(secondaryAlignmentsList, "tag");
+        appendValue(secondaryAlignmentsList, "record");
+        appendValue(secondaryAlignmentsList, "omit");
+
+        appendValue(sensitivityList, "low");
+        appendValue(sensitivityList, "high");
+        appendValue(sensitivityList, "full");
+
+//        appendValue(libraryOrientationList, "fwd-rev");
+//        appendValue(libraryOrientationList, "fwd-fwd");
+//        appendValue(libraryOrientationList, "rev-rev");
     }
 };
 
@@ -191,7 +205,7 @@ struct MapperTraits
     typedef StringSet<TSeedsCount, Owner<ConcatDirect<> > >         TRanks;
     typedef Tuple<TRanks, TConfig::BUCKETS>                         TRanksBuckets;
 
-    typedef Limits<TContigsLen, TContigsSum>                        TMatchSpec;
+    typedef Limits<TContigsSize, TContigsLen, TContigsSum>          TMatchSpec;
     typedef Match<TMatchSpec>                                       TMatch;
     typedef String<TMatch>                                          TMatches;
     typedef ConcurrentAppender<TMatches>                            TMatchesAppender;
@@ -340,7 +354,7 @@ inline void loadContigs(Mapper<TSpec, TConfig> & me)
     start(me.timer);
     try
     {
-        if (!open(me.contigs, toCString(me.options.contigsIndexFile)))
+        if (!open(me.contigs, toCString(me.options.contigsIndexFile), OPEN_RDONLY))
             throw RuntimeError("Error while opening reference file.");
     }
     catch (BadAlloc const & /* e */)
@@ -364,7 +378,7 @@ inline void loadContigsIndex(Mapper<TSpec, TConfig> & me)
     start(me.timer);
     try
     {
-        if (!open(me.index, toCString(me.options.contigsIndexFile)))
+        if (!open(me.index, toCString(me.options.contigsIndexFile), OPEN_RDONLY))
             throw RuntimeError("Error while opening reference index file.");
     }
     catch (BadAlloc const & /* e */)
@@ -588,7 +602,10 @@ inline void findSeeds(Mapper<TSpec, TConfig> & me, TBucketId bucketId)
     {
         // Estimate the number of hits.
         reserve(me.hits[bucketId], lengthSum(me.seeds[bucketId]) * Power<ERRORS, 2>::VALUE, Exact());
-        _findSeedsImpl(me, me.hits[bucketId], me.seeds[bucketId], ERRORS, HammingDistance());
+        if (me.options.sensitivity == FULL)
+            _findSeedsImpl(me, me.hits[bucketId], me.seeds[bucketId], ERRORS, EditDistance());
+        else
+            _findSeedsImpl(me, me.hits[bucketId], me.seeds[bucketId], ERRORS, HammingDistance());
     }
     else
     {
@@ -901,39 +918,46 @@ inline void rankMatches(Mapper<TSpec, TConfig> & me, TReadSeqs const & readSeqs)
     if (IsSameType<typename TConfig::TSequencing, SingleEnd>::VALUE) return;
 
     start(me.timer);
-    // Collect library lengths from unique pairs.
-    TLibraryLengths libraryLengths;
-    reserve(libraryLengths, getPairsCount(readSeqs), Exact());
-    ConcurrentAppender<TLibraryLengths> libraryLengthsAppender(libraryLengths);
-    forAllMatchesPairs(me.matchesSetByCoord, readSeqs, [&](TMatchesSetValue const & firstMatches, TMatchesSetValue const & secondMatches)
+    // Estimate library mean length and deviation if one of them was not provided.
+    if (!me.options.libraryLength || !me.options.libraryDev)
     {
-        if (length(firstMatches) == 1 && length(secondMatches) == 1)
+        // Collect library lengths from unique optimal pairs.
+        TLibraryLengths libraryLengths;
+        reserve(libraryLengths, getPairsCount(readSeqs), Exact());
+        ConcurrentAppender<TLibraryLengths> libraryLengthsAppender(libraryLengths);
+        forAllMatchesPairs(me.optimalMatchesSet, readSeqs, [&](TMatchesViewSetValue const & firstMatches, TMatchesViewSetValue const & secondMatches)
         {
-            TMatch const & firstMatch = front(firstMatches);
-            TMatch const & secondMatch = front(secondMatches);
+            if (length(firstMatches) == 1 && length(secondMatches) == 1)
+            {
+                TMatch const & firstMatch = front(firstMatches);
+                TMatch const & secondMatch = front(secondMatches);
 
-            if (contigEqual(firstMatch, secondMatch) && orientationProper(firstMatch, secondMatch))
-                appendValue(libraryLengthsAppender, getLibraryLength(firstMatch, secondMatch), Insist(), typename TTraits::TThreading());
-        }
-    },
-    typename TTraits::TThreading());
+                if (contigEqual(firstMatch, secondMatch) && orientationProper(firstMatch, secondMatch))
+                    appendValue(libraryLengthsAppender, getLibraryLength(firstMatch, secondMatch), Insist(), typename TTraits::TThreading());
+            }
+        },
+        typename TTraits::TThreading());
 
-    // Remove library outliers > 6 * median.
-    if (!empty(libraryLengths))
-    {
+        // If library mean length and deviation cannot be estimated proceed as single-ended.
+        if (empty(libraryLengths)) return;
+
+        // Remove library outliers > 6 * median.
         unsigned libraryMedian = nthElement(libraryLengths, length(libraryLengths) / 2, typename TTraits::TThreading());
         removeIf(libraryLengths, std::bind2nd(std::greater<unsigned>(), 6.0 * libraryMedian), typename TTraits::TThreading());
 
+        // If library mean length and deviation cannot be estimated proceed as single-ended.
+        if (empty(libraryLengths)) return;
+
         // Compute library mean.
         unsigned librarySum = accumulate(libraryLengths, 0u, typename TTraits::TThreading());
-        float libraryMean = librarySum / static_cast<float>(length(libraryLengths));
+        float libraryMean = std::max(librarySum / static_cast<float>(length(libraryLengths)), 1.0f);
 
         // Compute library standard deviation.
         String<float> libraryDiffs;
         resize(libraryDiffs, length(libraryLengths), Exact());
         transform(libraryDiffs, libraryLengths, std::bind2nd(std::minus<float>(), libraryMean), typename TTraits::TThreading());
         float librarySqSum = innerProduct(libraryDiffs, 0.0f, typename TTraits::TThreading());
-        float libraryDev = std::sqrt(librarySqSum / static_cast<float>(length(libraryLengths)));
+        float libraryDev = std::max(std::sqrt(librarySqSum / static_cast<float>(length(libraryLengths))), 1.0f);
 
         if (me.options.verbose > 1)
         {
@@ -1222,7 +1246,7 @@ inline void _mapReadsImpl(Mapper<TSpec, TConfig> & me, TReadSeqs & readSeqs, All
     collectSeeds<1>(me, readSeqs);
     collectSeeds<2>(me, readSeqs);
     findSeeds<1>(me, 1);
-    if (me.options.quick)
+    if (me.options.sensitivity == LOW)
         findSeeds<1>(me, 2);
     else
         findSeeds<2>(me, 2);
@@ -1234,7 +1258,8 @@ inline void _mapReadsImpl(Mapper<TSpec, TConfig> & me, TReadSeqs & readSeqs, All
     clearHits(me);
     aggregateMatches(me, readSeqs);
     rankMatches(me, readSeqs);
-    verifyMatches(me);
+    if (me.options.verifyMatches)
+        verifyMatches(me);
     alignMatches(me);
     writeMatches(me);
     clearMatches(me);
@@ -1278,7 +1303,7 @@ inline void _mapReadsImpl(Mapper<TSpec, TConfig> & me, TReadSeqs & readSeqs, Str
     clearSeeds(me);
     clearHits(me);
 
-    if (!me.options.quick)
+    if (me.options.sensitivity > LOW)
     {
         initSeeds(me, readSeqs);
         collectSeeds<2>(me, readSeqs);
@@ -1292,7 +1317,8 @@ inline void _mapReadsImpl(Mapper<TSpec, TConfig> & me, TReadSeqs & readSeqs, Str
 
     aggregateMatches(me, readSeqs);
     rankMatches(me, readSeqs);
-    verifyMatches(me);
+    if (me.options.verifyMatches)
+        verifyMatches(me);
     alignMatches(me);
     writeMatches(me);
     clearMatches(me);

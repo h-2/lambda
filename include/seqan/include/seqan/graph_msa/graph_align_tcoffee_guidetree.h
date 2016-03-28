@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_GUIDETREE_H
 #define SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_GUIDETREE_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -372,7 +372,6 @@ _upgmaTreeMerge(TMatrix& mat,
                 TSize nseq,
                 UpgmaWeightAvg)
 {
-    SEQAN_CHECKPOINT
     typedef typename Value<TMatrix>::Type TValue;
     // Average
     for(TSize i=0;i<nseq;++i) {
@@ -402,7 +401,6 @@ _upgmaTreeMerge(TMatrix& mat,
                 TSize nseq,
                 UpgmaAvg)
 {
-    SEQAN_CHECKPOINT
     typedef typename Value<TMatrix>::Type TValue;
 
     // Minimum
@@ -428,7 +426,6 @@ _upgmaTreeMerge(TMatrix& mat,
                 TSize nseq,
                 UpgmaMin)
 {
-    SEQAN_CHECKPOINT
     typedef typename Value<TMatrix>::Type TValue;
 
     // Minimum
@@ -453,7 +450,6 @@ _upgmaTreeMerge(TMatrix& mat,
                 TSize nseq,
                 UpgmaMax)
 {
-    SEQAN_CHECKPOINT
     typedef typename Value<TMatrix>::Type TValue;
 
     // Maximum
@@ -610,7 +606,6 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
           Graph<Tree<TCargo, TSpec> >& g,
           TTag)
 {
-    SEQAN_CHECKPOINT
     typedef Graph<Tree<TCargo, TSpec> > TGraph;
     typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
     typedef typename Size<TGraph>::Type TSize;
@@ -725,7 +720,6 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
           Graph<Tree<TCargo, TSpec2> >& g,
           TTag)
 {
-    SEQAN_CHECKPOINT
     typedef Graph<Undirected<TValue, TSpec1> > TPairGraph;
     typedef Graph<Tree<TCargo, TSpec2> > TGuideTree;
     typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
@@ -895,11 +889,10 @@ inline void
 upgmaTree(TDistance& dist,
           Graph<Tree<TCargo, TSpec> >& g)
 {
-    SEQAN_CHECKPOINT
     upgmaTree(dist, g, UpgmaWeightAvg());
 }
 
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_...

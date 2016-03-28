@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // Copyright (c) 2013 NVIDIA Corporation
 // All rights reserved.
 //
@@ -74,6 +74,7 @@ namespace seqan {
  *        default @link FMIndexConfig @endlink object the type of <tt>TSentinelsSpec</tt> is a two level
  *        @link RankDictionary @endlink.
  */
+
 template <typename TSpec = void, typename TLengthSum = size_t>
 struct FMIndexConfig
 {
@@ -124,7 +125,7 @@ typedef Tag<FibreSALF_> const           FibreSALF;
  * @tag FMIndexFibres#FibreText
  * @brief The original text of the index.
  *
- * @tagFMIndexFibres#FibreSA
+ * @tag FMIndexFibres#FibreSA
  * @brief The compressed suffix array of the text.
  *
  * @tag FMIndexFibres#FibreLF

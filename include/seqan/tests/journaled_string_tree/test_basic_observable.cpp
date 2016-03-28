@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@
 SEQAN_BEGIN_TESTSUITE(test_basic_observable)
 {
     // Tests for basic observable pattern.
-    SEQAN_CALL_TEST(test_basic_observable_constructor);
     SEQAN_CALL_TEST(test_basic_observable_length);
     SEQAN_CALL_TEST(test_basic_observable_set_observer);
     SEQAN_CALL_TEST(test_basic_observable_notify);

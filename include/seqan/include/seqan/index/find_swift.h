@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #ifndef SEQAN_HEADER_FIND_SWIFT_H
 #define SEQAN_HEADER_FIND_SWIFT_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2077,7 +2077,6 @@ windowFindBegin(
     Pattern<TIndex, Swift<TSpec> > &pattern,
     double errorRate)
 {
-    SEQAN_CHECKPOINT
 
     pattern.finderLength = pattern.params.tabooLength + length(container(finder));
     _patternInit(pattern, errorRate, 0);
@@ -2122,7 +2121,6 @@ windowFindNext(
     TSize finderWindowLength
     )
 {
-    SEQAN_CHECKPOINT
 
     typedef typename Fibre<TIndex, QGramShape>::Type    TShape;
 
@@ -2185,7 +2183,6 @@ windowFindEnd(
     Finder<THaystack, Swift<TSpec> > & finder,
     Pattern<TIndex, Swift<TSpec> > &pattern)
 {
-    SEQAN_CHECKPOINT
     _swiftMultiFlushBuckets(finder, pattern);
 }
 
@@ -2206,7 +2203,6 @@ template <typename THaystack, typename TSpec>
 inline typename WindowFindResult<Finder<THaystack, Swift<TSpec> >, void>::Type &
 getWindowFindHits(Finder<THaystack, Swift<TSpec> > &finder)
 {
-    SEQAN_CHECKPOINT
 
     return finder.hits;
 }
@@ -2232,7 +2228,7 @@ getMaxDeviationOfOrder(Pattern<TIndex, Swift<TSpec> > &pattern)
 }
 
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_FIND_SHIFTAND_H
 

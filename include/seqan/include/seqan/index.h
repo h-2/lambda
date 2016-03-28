@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // Copyright (c) 2013 NVIDIA Corporation
 // All rights reserved.
 //
@@ -74,6 +74,7 @@
 #endif  // #ifdef SEQAN_PARALLEL
 
 #include <seqan/index/index_base.h>
+#include <seqan/index/index_bidirectional.h>
 
 #include <seqan/index/find_index_binary.h>
 
@@ -135,6 +136,7 @@
 
 #include <seqan/index/index_esa_base.h>
 #include <seqan/index/index_esa_stree.h>
+#include <seqan/index/index_bidirectional_stree.h>
 #include <seqan/index/index_wotd.h>
 #include <seqan/index/index_dfi.h>
 #include <seqan/index/index_sa_stree.h>
@@ -168,6 +170,13 @@
 #include <seqan/index/index_fm_compressed_sa_iterator.h>
 #include <seqan/index/index_fm.h>
 #include <seqan/index/index_fm_stree.h>
+
+// ----------------------------------------------------------------------------
+// Bidirectional FM index.
+// ----------------------------------------------------------------------------
+
+#include <seqan/index/index_bifm.h>
+#include <seqan/index/index_bifm_stree.h>
 
 // ----------------------------------------------------------------------------
 // Suffix tree algorithms.

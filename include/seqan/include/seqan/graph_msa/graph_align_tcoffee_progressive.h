@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_PROGRESSIVE_H
 #define SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_PROGRESSIVE_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,6 @@ _buildLeafString(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
                  TPosition const pos,
                  TSequence& alignSeq)
 {
-    SEQAN_CHECKPOINT
     typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
     typedef typename Size<TGraph>::Type TSize;
     typedef typename Id<TGraph>::Type TId;
@@ -84,7 +83,6 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
                       TSegmentString& alignSeq,
                       TOutGraph& gOut)
 {
-    SEQAN_CHECKPOINT
     typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
     typedef typename Size<TGraph>::Type TSize;
     typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -133,7 +131,6 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
                      TGuideTree& tree,
                      TOutGraph& gOut)
 {
-    SEQAN_CHECKPOINT
     typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
     typedef typename Size<TGraph>::Type TSize;
     typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
@@ -483,6 +480,6 @@ progressiveMatching(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 }
 
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_...

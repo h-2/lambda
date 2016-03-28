@@ -1,7 +1,7 @@
 # ============================================================================
 #                  SeqAn - The Library for Sequence Analysis
 # ============================================================================
-# Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+# Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -221,6 +221,8 @@ add_custom_command (OUTPUT ${WORKFLOW_PLUGIN_DIR}/plugin.properties
                                              "-DWORKFLOW_PLUGIN_DIR=${WORKFLOW_PLUGIN_DIR}"
                                              "-DSEQAN_VERSION_STRING=${SEQAN_VERSION_STRING}"
                                              "-DSEQAN_DATE=${SEQAN_DATE}"
+                                             "-DCTD_PLUGIN_PACKAGE=${CTD_PLUGIN_PACKAGE}"
+                                             "-DCTD_PLUGIN_NAME=${CTD_PLUGIN_NAME}"
                                              -P "${CMAKE_SOURCE_DIR}/util/cmake/ctd/configure_profile_properties.cmake"
                     DEPENDS ${WORKFLOW_PLUGIN_DIR}
                             ${CMAKE_SOURCE_DIR}/util/cmake/ctd/plugin.properties.in)

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -336,7 +336,6 @@ template <typename TNeedle, typename TSpec>
 inline typename Host<Pattern<TNeedle, TSpec> >::Type &
 host(Pattern<TNeedle, TSpec> & me)
 {
-    SEQAN_CHECKPOINT
     return value(me.data_host);
 }
 
@@ -344,7 +343,6 @@ template <typename TNeedle, typename TSpec>
 inline typename Host<Pattern<TNeedle, TSpec> const>::Type &
 host(Pattern<TNeedle, TSpec> const & me)
 {
-    SEQAN_CHECKPOINT
     return value(me.data_host);
 }
 
@@ -438,14 +436,12 @@ template <typename TNeedle, typename TSpec>
 inline typename ScoringScheme<Pattern<TNeedle, TSpec> >::Type
 scoringScheme(Pattern<TNeedle, TSpec> &)
 {
-SEQAN_CHECKPOINT
     return typename ScoringScheme<Pattern<TNeedle, TSpec> >::Type();
 }
 template <typename TNeedle, typename TSpec>
 inline typename ScoringScheme<Pattern<TNeedle, TSpec> const>::Type
 scoringScheme(Pattern<TNeedle, TSpec> const &)
 {
-SEQAN_CHECKPOINT
     return typename ScoringScheme<Pattern<TNeedle, TSpec> const>::Type();
 }
 

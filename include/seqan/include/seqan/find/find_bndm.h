@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #ifndef SEQAN_HEADER_FIND_BNDMALGO_H
 #define SEQAN_HEADER_FIND_BNDMALGO_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,6 @@ public:
 
 template <typename TNeedle>
 void _reinitPattern(Pattern<TNeedle, BndmAlgo> & me) {
-    SEQAN_CHECKPOINT
     typedef unsigned int TWord;
     typedef typename Value<TNeedle>::Type TValue;
 
@@ -138,7 +137,6 @@ void _reinitPattern(Pattern<TNeedle, BndmAlgo> & me) {
 template <typename TNeedle>
 inline void _patternInit (Pattern<TNeedle, BndmAlgo> & me)
 {
-SEQAN_CHECKPOINT
     clear(me.activeFactors);
     resize(me.activeFactors, me.blockCount, 0, Exact());
     me.last = 0;
@@ -151,7 +149,6 @@ SEQAN_CHECKPOINT
 template <typename TFinder, typename TNeedle>
 inline bool _findBndmSmallNeedle(TFinder & finder,
                                   Pattern<TNeedle, BndmAlgo> & me) {
-    SEQAN_CHECKPOINT
     typedef unsigned int TWord;
     typedef typename Value<TNeedle>::Type TNeedleAlphabet;
 
@@ -184,7 +181,6 @@ inline bool _findBndmSmallNeedle(TFinder & finder,
 
 template <typename TFinder, typename TNeedle>
 inline bool _findBndmLargeNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
-    SEQAN_CHECKPOINT
     typedef unsigned int TWord;
     typedef typename Value<TNeedle>::Type TNeedleAlphabet;
 
@@ -236,7 +232,6 @@ inline bool _findBndmLargeNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> & 
 
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
-    SEQAN_CHECKPOINT
 
     if (empty(finder)) {
         _patternInit(me);
@@ -254,6 +249,6 @@ inline bool find(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
     }
 }
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_FIND_SHIFTAND_H

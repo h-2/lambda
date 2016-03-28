@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -171,7 +171,6 @@ inline TValue &
 value(TValue * me,
       TPos pos)
 {
-    SEQAN_CHECKPOINT;
     return me[pos];
 }
 
@@ -181,7 +180,6 @@ assignValue(TValue * me,
             TPos pos,
             TValue2 const & _value)
 {
-    SEQAN_CHECKPOINT;
     seqan::assign(value(me, pos), _value);
 }
 
@@ -191,7 +189,6 @@ moveValue(TValue * me,
           TPos pos,
           TValue2 const & _value)
 {
-    SEQAN_CHECKPOINT;
     move(value(me, pos), _value);
 }
 #endif  // !defined(PLATFORM_WINDOWS_VS) 

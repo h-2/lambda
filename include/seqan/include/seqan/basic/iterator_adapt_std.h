@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -445,7 +445,6 @@ template <typename TContainer>
 inline void
 goNext(Iter<TContainer, StdIteratorAdaptor> & me)
 {
-    SEQAN_CHECKPOINT;
     goNext(hostIterator(me));
 }
 
@@ -457,7 +456,6 @@ template <typename TContainer>
 inline void
 goPrevious(Iter<TContainer, StdIteratorAdaptor> & me)
 {
-    SEQAN_CHECKPOINT;
     goPrevious(hostIterator(me));
 }
 
@@ -470,7 +468,6 @@ inline Iter<TContainer, StdIteratorAdaptor>
 operator+(Iter<TContainer, StdIteratorAdaptor> left,
           TIntegral right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(left), right);
     return left;
 }
@@ -481,7 +478,6 @@ inline Iter<TContainer, StdIteratorAdaptor>
 operator+(Iter<TContainer, StdIteratorAdaptor> left,
           int right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(left), right);
     return left;
 }
@@ -491,7 +487,6 @@ inline Iter<TContainer, StdIteratorAdaptor>
 operator+(TIntegral left,
           Iter<TContainer, StdIteratorAdaptor> right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(right), left);
     return right;
 }
@@ -502,7 +497,6 @@ inline Iter<TContainer, StdIteratorAdaptor>
 operator+(int left,
           Iter<TContainer, StdIteratorAdaptor> right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(right), left);
     return right;
 }
@@ -516,7 +510,6 @@ inline Iter<TContainer, StdIteratorAdaptor> &
 operator+=(Iter<TContainer, StdIteratorAdaptor> & left,
            TIntegral right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(left), right);
     return left;
 }
@@ -527,7 +520,6 @@ inline Iter<TContainer, StdIteratorAdaptor> &
 operator+=(Iter<TContainer, StdIteratorAdaptor> & left,
            int right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(left), right);
     return left;
 }
@@ -541,8 +533,7 @@ inline Iter<TContainer, StdIteratorAdaptor>
 operator-(Iter<TContainer, StdIteratorAdaptor> left,
           TIntegral right)
 {
-    SEQAN_CHECKPOINT;
-    std::advance(hostIterator(left), -right);
+    std::advance(hostIterator(left), -static_cast<typename MakeSigned<TIntegral>::Type>(right));
     return left;
 }
 
@@ -552,7 +543,6 @@ inline Iter<TContainer, StdIteratorAdaptor>
 operator-(Iter<TContainer, StdIteratorAdaptor> left,
           int right)
 {
-    SEQAN_CHECKPOINT
     std::advance(hostIterator(left), -right);
     return left;
 }
@@ -562,7 +552,6 @@ inline typename Difference<Iter<TContainer, StdIteratorAdaptor> >::Type
 operator-(Iter<TContainer, StdIteratorAdaptor> const & left,
           Iter<TContainer, StdIteratorAdaptor> const & right)
 {
-    SEQAN_CHECKPOINT;
     return hostIterator(left) - hostIterator(right);
 }
 
@@ -575,7 +564,6 @@ inline Iter<TContainer, StdIteratorAdaptor> &
 operator-=(Iter<TContainer, StdIteratorAdaptor> & left,
            TIntegral right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(left), -right);
     return left;
 }
@@ -586,7 +574,6 @@ inline Iter<TContainer, StdIteratorAdaptor> &
 operator -= (Iter<TContainer, StdIteratorAdaptor> & left,
              int right)
 {
-    SEQAN_CHECKPOINT;
     std::advance(hostIterator(left), -right);
     return left;
 }
@@ -601,7 +588,6 @@ inline void
 assign(Iter<TTargetContainer, StdIteratorAdaptor> & target,
        TSource const & source)
 {
-    SEQAN_CHECKPOINT;
     target.data_iterator = begin(container(source)) + position(source);
 }
 
