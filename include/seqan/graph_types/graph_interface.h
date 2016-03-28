@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 
 // TODO(holtgrew): The documentation needs some improvements, possibly together with a refactoring of the module.
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 // Default directed graph
@@ -677,7 +677,6 @@ template<typename TId>
 inline TId
 _getId(TId const id)
 {
-    SEQAN_CHECKPOINT
     return id;
 }
 
@@ -742,6 +741,6 @@ operator << (TStream & target,
     return target;
 }
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_...

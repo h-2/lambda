@@ -22,7 +22,7 @@
 #ifndef SEQAN_HEADER_RAZERS_MATEPAIRS_H
 #define SEQAN_HEADER_RAZERS_MATEPAIRS_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 // We require mate-pairs to be stored together in one read string.
@@ -445,10 +445,10 @@ bool loadReads(
     if (!success)
         return false;
 
-	CharString fastaId[2];
-	String<Dna5Q> seq[2];
-	CharString qual[2];
-	
+    CharString fastaId[2];
+    String<Dna5Q> seq[2];
+    CharString qual[2];
+
 	unsigned kickoutcount = 0;
 	while (!atEnd(leftMates) && !atEnd(rightMates))
 	{

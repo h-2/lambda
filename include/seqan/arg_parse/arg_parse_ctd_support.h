@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -413,8 +413,14 @@ writeCTD(ArgumentParser const & me, std::ostream & ctdfile)
         _getRestrictions(restrictions, opt);
 
         // set up supported formats
+        // add *.* to supported_formats if none is specified AND the type of the argument is a
+        // prefix type. This is important for KNIME nodes as they require similar file types
+        // to connect one node to the other. In this particular case any file is aproprate
+        // since we are talking about prefixes.
         std::vector<std::string> supported_formats;
         _getSupportedFormats(supported_formats, opt);
+        if (empty(supported_formats) && (type=="input-prefix" || type=="output-prefix" ))
+            supported_formats.push_back("*.*");
 
         ctdfile << _indent(currentIndent)
                 << "<ITEM" << (isListArgument(opt) ? "LIST" : "") << " name=\"" << xmlEscape(optionName) << "\"";
@@ -495,8 +501,15 @@ writeCTD(ArgumentParser const & me, std::ostream & ctdfile)
         _getRestrictions(restrictions, arg);
 
         // set up supported formats
+        // add *.* to supported_formats if none is specified AND the type of the argument is a
+        // prefix type. This is important for KNIME nodes as they require similar file types
+        // to connect one node to the other. In this particular case any file is aproprate
+        // since we are talking about prefixes.
         std::vector<std::string> supported_formats;
         _getSupportedFormats(supported_formats, arg);
+        if (empty(supported_formats) && (type=="input-prefix" || type=="output-prefix" ))
+            supported_formats.push_back("*.*");
+
 
         ctdfile << _indent(currentIndent)
                 << "<ITEM" << (isListArgument(arg) ? "LIST" : "") << " name=\"" << xmlEscape(optionName) << "\" "

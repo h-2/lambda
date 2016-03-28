@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // Copyright (c) 2013 NVIDIA Corporation
 // All rights reserved.
 //
@@ -36,7 +36,7 @@
 #ifndef SEQAN_HEADER_SHAPE_THRESHOLD_H
 #define SEQAN_HEADER_SHAPE_THRESHOLD_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 struct ThreshQGramLemma_;
@@ -150,7 +150,6 @@ int qgramThreshold(TShape const & shape, TPatternSize patternLength, TErrors err
     inline void assign(char & c_target,
                        ErrorAlphabet const & source)
     {
-    SEQAN_CHECKPOINT
         c_target = TranslateTableErrorToChar_<>::VALUE[source.value];
     }
 

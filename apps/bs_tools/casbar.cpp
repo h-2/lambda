@@ -1,7 +1,7 @@
 // ==========================================================================
 //                              casbar
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -959,6 +959,7 @@ int detectSNPs(SNPCallingOptions &options, TMethOptions &methOptions)
                 appendName(contigNamesCache(context(vcfFileOut)), fragmentStore1.contigNameStore[i]);
             writeRecord(vcfFileOut, vcfRecord);
         }
+        ClassTest::_deleteTempFile(ClassTest::_stripFileName(toCString(contigTempFileNamesVcf[i])));
         remove(toCString(contigTempFileNamesVcf[i]));  // Delete temp. files
 
         // BED
@@ -975,6 +976,7 @@ int detectSNPs(SNPCallingOptions &options, TMethOptions &methOptions)
             readRecord(bedRecord, bedFileIn);
             writeRecord(bedFileOut, bedRecord);
         }
+        ClassTest::_deleteTempFile(ClassTest::_stripFileName(toCString(contigTempFileNamesBed[i])));
         remove(toCString(contigTempFileNamesBed[i]));
     }
 

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #ifndef SEQAN_HEADER_FIND_SETHORSPOOL_H
 #define SEQAN_HEADER_FIND_SETHORSPOOL_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,6 @@ public:
 template <typename TNeedle>
 void _reinitPattern(Pattern<TNeedle, SetHorspool> & me)
 {
-    SEQAN_CHECKPOINT
     typedef typename Value<TNeedle>::Type TKeyword;
     typedef typename Size<TKeyword>::Type TSize;
     typedef typename Value<TKeyword>::Type TAlphabet;
@@ -166,7 +165,6 @@ void _reinitPattern(Pattern<TNeedle, SetHorspool> & me)
 template <typename TNeedle>
 inline void _patternInit (Pattern<TNeedle, SetHorspool> & me)
 {
-SEQAN_CHECKPOINT
     clear(me.data_endPositions);
     me.data_keywordIndex = 0;
     me.data_lastState = getRoot(me.data_reverseTrie);
@@ -185,7 +183,6 @@ position(Pattern<TNeedle, SetHorspool> & me)
 
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
-    SEQAN_CHECKPOINT
     typedef typename Value<TNeedle>::Type TKeyword;
     typedef typename Size<TKeyword>::Type TSize;
     typedef typename Value<TKeyword>::Type TAlphabet;
@@ -257,6 +254,6 @@ inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
     return false;
 }
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_FIND_SETHORSPOOL_H

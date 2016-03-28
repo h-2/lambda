@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #ifndef SEQAN_HEADER_STORE_IO_SAM_H
 #define SEQAN_HEADER_STORE_IO_SAM_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 // ============================================================================
@@ -1118,6 +1118,6 @@ writeRecords(FormattedFile<Bam, Output, TSpec> & bamFile,
     writeRecords(bamFile, store, functor);
 }
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -151,16 +151,17 @@ struct Member<Match<TSpec>, ReadId>
     typedef uint32_t    Type;
 };
 
-template <typename TSpec>
-struct Member<Match<TSpec>, ContigId>
+template <typename TContigsSize, typename TContigsLen, typename TContigsSum>
+struct Member<Match<Limits<TContigsSize, TContigsLen, TContigsSum> >, ContigId>
 {
-    typedef uint16_t    Type;
+    // To remove GCC packed-bitfield-compat warning. See MemberBits below.
+    typedef uint32_t  Type;
 };
 
-template <typename TContigsLen, typename TContigsSum>
-struct Member<Match<Limits<TContigsLen, TContigsSum> >, ContigSize>
+template <typename TContigsSize, typename TContigsLen, typename TContigsSum>
+struct Member<Match<Limits<TContigsSize, TContigsLen, TContigsSum> >, ContigSize>
 {
-    typedef TContigsSum  Type;
+    typedef TContigsLen  Type;
 };
 
 template <typename TSpec>
@@ -174,13 +175,11 @@ struct Member<Match<TSpec>, Errors>
 {
     typedef uint32_t    Type;
 };
-}
 
 // ----------------------------------------------------------------------------
 // Member Bits
 // ----------------------------------------------------------------------------
 
-namespace seqan {
 template <typename TObject, typename TSpec>
 struct MemberBits
 {
@@ -193,14 +192,28 @@ struct MemberBits<Match<TSpec>, ReadId>
     static const unsigned VALUE = 21;
 };
 
-template <typename TContigsLen>
-struct MemberBits<Match<Limits<TContigsLen, uint8_t> >, ContigId>
+template <typename TContigsLen, typename TContigsSum>
+struct MemberBits<Match<Limits<uint8_t, TContigsLen, TContigsSum> >, ContigId>
 {
+    // To remove GCC packed-bitfield-compat warning.
     static const unsigned VALUE = 8;
 };
 
-template <typename TContigsLen>
-struct MemberBits<Match<Limits<TContigsLen, uint64_t> >, ContigSize>
+template <typename TContigsLen, typename TContigsSum>
+struct MemberBits<Match<Limits<uint16_t, TContigsLen, TContigsSum> >, ContigId>
+{
+    // To remove GCC packed-bitfield-compat warning.
+    static const unsigned VALUE = 16;
+};
+
+template <typename TContigsLen, typename TContigsSum>
+struct MemberBits<Match<Limits<uint32_t, TContigsLen, TContigsSum> >, ContigId>
+{
+    static const unsigned VALUE = 30;
+};
+
+template <typename TContigsSize, typename TContigsSum>
+struct MemberBits<Match<Limits<TContigsSize, uint64_t, TContigsSum> >, ContigSize>
 {
     static const unsigned VALUE = 48;
 };
@@ -823,10 +836,10 @@ findProperMates(TMatches const & mates, TMatch const & match,
     typedef typename Size<TReadSeqs>::Type          TReadId;
     typedef typename Value<TReadSeqs const>::Type   TReadSeq;
     typedef typename Size<TReadSeq>::Type           TReadSeqSize;
-    typedef typename MakeSigned<TReadSeqSize>::Type TSignedSize;
+    typedef typename MakeSigned<TReadSeqSize>::Type TReadDelta;
 
     TReadId mateId = getMateId(readSeqs, getMember(match, ReadId()));
-    TReadSeqSize mateLength = length(readSeqs[mateId]);
+    TReadDelta mateLength = length(readSeqs[mateId]);
 
     // Create lower and upper bound for the mate.
     TMatch mateLeq = match;
@@ -836,8 +849,10 @@ findProperMates(TMatches const & mates, TMatch const & match,
     mateLeq.errors = 0;
     mateGeq.errors = MemberLimits<TMatch, Errors>::VALUE;
 
-    TReadSeqSize deltaMinus = std::max((TSignedSize)0, (TSignedSize)mean - 6 * stdDev - (TSignedSize)mateLength);
-    TReadSeqSize deltaPlus = std::max((TSignedSize)0, (TSignedSize)mean + 6 * stdDev - (TSignedSize)mateLength);
+    TReadSeqSize deltaMinus = std::max(static_cast<TReadDelta>(0),
+                                       static_cast<TReadDelta>(mean) - static_cast<TReadDelta>(6 * stdDev) - mateLength);
+    TReadSeqSize deltaPlus = std::max(static_cast<TReadDelta>(0),
+                                      static_cast<TReadDelta>(mean) + static_cast<TReadDelta>(6 * stdDev) - mateLength);
 
     // --> ... mate
     if (onForwardStrand(match))
@@ -855,7 +870,8 @@ findProperMates(TMatches const & mates, TMatch const & match,
     TIter first = std::lower_bound(begin(mates, Standard()), end(mates, Standard()), mateLeq, MatchSorter<TMatch, ContigBegin>());
     TIter last = std::upper_bound(begin(mates, Standard()), end(mates, Standard()), mateGeq, MatchSorter<TMatch, ContigEnd>());
 
-    SEQAN_ASSERT_LEQ(first, last);
+    // Return empty infix if no proper mates were found.
+    if (first > last) return infix(mates, 0, 0);
 
     return infix(mates, position(first, mates), position(last, mates));
 }

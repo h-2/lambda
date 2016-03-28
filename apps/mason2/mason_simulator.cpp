@@ -1,7 +1,7 @@
 // ==========================================================================
 //                         Mason - A Read Simulator
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -638,8 +638,8 @@ public:
 
     void init(int seed, int methSeed, MasonSimulatorOptions const & newOptions)
     {
-        reSeed(rng, seed);
-        reSeed(methRng, methSeed);
+        rng.seed(seed);
+        methRng.seed(methSeed);
         options = &newOptions;
         buildAlignments = !empty(options->outFileNameSam);
 

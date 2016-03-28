@@ -1,7 +1,7 @@
 // ==========================================================================
 //                         Mason - A Read Simulator
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,12 @@
 #define APPS_MASON2_SEQUENCING_H_
 
 #include <stdexcept>
+#include <random>
 
 #include <seqan/bam_io.h>
 #include <seqan/seq_io.h>
 #include <seqan/modifier.h>
 #include <seqan/sequence.h>
-#include <seqan/random.h>
 
 #include "mason_options.h"
 #include "methylation_levels.h"
@@ -61,7 +61,7 @@ class Roche454Model;
 
 typedef seqan::Dna5String TRead;
 typedef seqan::CharString TQualities;
-typedef seqan::Rng<seqan::MersenneTwister> TRng;
+typedef std::mt19937 TRng;
 typedef seqan::Infix<seqan::Dna5String const>::Type TFragment;
 typedef seqan::String<seqan::CigarElement<> > TCigarString;
 

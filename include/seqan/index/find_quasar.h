@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #ifndef SEQAN_HEADER_FIND_QUASAR_H
 #define SEQAN_HEADER_FIND_QUASAR_H
 
-namespace SEQAN_NAMESPACE_MAIN
+namespace seqan
 {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,6 @@ public:
 template <typename TNeedle>
 inline void _patternInit (Pattern<TNeedle, Quasar> & /*me*/)
 {
-SEQAN_CHECKPOINT
 }
 
 
@@ -99,7 +98,6 @@ template <typename TFinder, typename TNeedle>
 inline bool
 find(TFinder & finder, Pattern<TNeedle, Quasar> & me)
 {
-    SEQAN_CHECKPOINT
 
     if (empty(finder)) {
         _patternInit(me);
@@ -111,7 +109,7 @@ find(TFinder & finder, Pattern<TNeedle, Quasar> & me)
     return true;
 }
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}// namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_FIND_SHIFTAND_H
 

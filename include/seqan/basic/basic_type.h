@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2015, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2016, Knut Reinert, FU Berlin
 // Copyright (c) 2013 NVIDIA Corporation
 // All rights reserved.
 //
@@ -436,14 +436,12 @@ template <typename T>
 SEQAN_HOST_DEVICE inline typename NonConstPointer_<T>::Type
 _toPointer(T & _object)
 {
-SEQAN_CHECKPOINT
     return & _object;
 }
 template <typename T>
 SEQAN_HOST_DEVICE inline typename NonConstPointer_<T const>::Type
 _toPointer(T const & _object)
 {
-SEQAN_CHECKPOINT
     return & _object;
 }
 
@@ -451,7 +449,6 @@ template <typename T>
 SEQAN_HOST_DEVICE inline typename NonConstPointer_<T *>::Type
 _toPointer(T * _object)
 {
-SEQAN_CHECKPOINT
     return _object;
 }
 
