@@ -243,6 +243,7 @@ struct LambdaOptions : public SharedOptions
 //     bool            semiGlobal;
 
     bool            doubleIndexing = true;
+    bool            adaptiveSeeding;
 
     unsigned        seedLength  = 0;
     unsigned        maxSeedDist = 1;
@@ -271,6 +272,7 @@ struct LambdaOptions : public SharedOptions
 
     bool            filterPutativeDuplicates = true;
     bool            filterPutativeAbundant = true;
+    bool            mergePutativeSiblings = true;
 
     int             preScoring = 0; // 0 = off, 1 = seed, 2 = region (
     double          preScoringThresh    = 0.0;
@@ -583,6 +585,14 @@ parseCommandLine(LambdaOptions & options, int argc, char const ** argv)
 //                                             ArgParseArgument::INTEGER));
 //     setDefaultValue(parser, "ungapped-seeds", "1");
 
+    addOption(parser, ArgParseOption("as", "adaptive-seeding",
+        "SECRET",
+        ArgParseArgument::STRING,
+        "STR"));
+    setValidValues(parser, "adaptive-seeding", "on off");
+    setDefaultValue(parser, "adaptive-seeding", "off");
+    setAdvanced(parser, "adaptive-seeding");
+
     addOption(parser, ArgParseOption("sl", "seed-length",
         "Length of the seeds (default = 14 for BLASTN).",
         ArgParseArgument::INTEGER));
@@ -646,6 +656,14 @@ parseCommandLine(LambdaOptions & options, int argc, char const ** argv)
     setValidValues(parser, "filter-putative-abundant", "on off");
     setDefaultValue(parser, "filter-putative-abundant", "on");
     setAdvanced(parser, "filter-putative-abundant");
+
+    addOption(parser, ArgParseOption("pm", "merge-putative-siblings",
+        "Merge seed from one region, "
+        "stop searching if the remaining realm looks unfeasable.",
+        ArgParseArgument::STRING));
+    setValidValues(parser, "merge-putative-siblings", "on off");
+    setDefaultValue(parser, "merge-putative-siblings", "on");
+    setAdvanced(parser, "merge-putative-siblings");
 
 //     addOption(parser, ArgParseOption("se",
 //                                             "seedminevalue",
@@ -885,6 +903,10 @@ parseCommandLine(LambdaOptions & options, int argc, char const ** argv)
     options.versionInformationToOutputFile = (buffer == "on");
 
     clear(buffer);
+    getOptionValue(buffer, parser, "adaptive-seeding");
+    options.adaptiveSeeding = (buffer == "on");
+
+    clear(buffer);
     getOptionValue(options.seedLength, parser, "seed-length");
     if ((!isSet(parser, "seed-length")) &&
         (options.blastProgram == BlastProgram::BLASTN))
@@ -965,11 +987,17 @@ parseCommandLine(LambdaOptions & options, int argc, char const ** argv)
     getOptionValue(buffer, parser, "filter-putative-abundant");
     options.filterPutativeAbundant = (buffer == "on");
 
+    getOptionValue(buffer, parser, "merge-putative-siblings");
+    options.mergePutativeSiblings = (buffer == "on");
+
     // TODO always prescore 1
     getOptionValue(options.preScoring, parser, "pre-scoring");
     if ((!isSet(parser, "pre-scoring")) &&
         (options.alphReduction == 0))
         options.preScoring = 1;
+    // for adaptive seeding we take the full resized seed (and no surroundings)
+//     if (options.adaptiveSeeding)
+//         options.preScoring = 1;
 
     getOptionValue(options.preScoringThresh, parser, "pre-scoring-threshold");
 //     if (options.preScoring == 0)
