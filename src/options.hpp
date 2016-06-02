@@ -49,6 +49,30 @@ struct SamBamExtraTags;
 // Metafunctions
 // ==========================================================================
 
+// SIZE TYPES
+
+// Expected Number of Sequences
+template <typename TAlph>
+using SizeTypeNum_ = uint32_t;
+
+// Expected Lengths of Sequences
+template <typename T>
+struct SizeTypePosMeta_
+{
+    using Type = uint16_t;
+};
+
+template <>
+struct SizeTypePosMeta_<Dna5>
+{
+    // DNA sequences are expected to be longer
+    using Type = uint32_t;
+};
+
+template <typename TAlph>
+using SizeTypePos_ = typename SizeTypePosMeta_<TAlph>::Type;
+
+
 // suffix array overloads
 namespace seqan
 {
@@ -56,26 +80,19 @@ namespace seqan
 template<typename TSpec1, typename TSpec2, typename TSpec3>
 struct SAValue<StringSet<String<ReducedAminoAcid<TSpec1>, TSpec2>, TSpec3> >
 {
-    typedef Pair<uint32_t, uint16_t, Pack> Type;
+    typedef Pair<SizeTypeNum_<TSpec1>, SizeTypePos_<TSpec1>, Pack> Type;
 };
 
-template<typename TSpec2, typename TSpec3, typename TFunctor>
-struct SAValue<StringSet<ModifiedString<String<AminoAcid, TSpec2>, TFunctor>, TSpec3> >
+template<typename TSpec1, typename TSpec2, typename TSpec3, typename TFunctor>
+struct SAValue<StringSet<ModifiedString<String<TSpec1, TSpec2>, TFunctor>, TSpec3> >
 {
-    typedef Pair<uint32_t, uint16_t, Pack> Type;
+    typedef Pair<SizeTypeNum_<TSpec1>, SizeTypePos_<TSpec1>, Pack> Type;
 };
 
-template<typename TSpec2, typename TSpec3>
-struct SAValue<StringSet<String<AminoAcid, TSpec2>, TSpec3> >
+template<typename TSpec1, typename TSpec2, typename TSpec3>
+struct SAValue<StringSet<String<TSpec1, TSpec2>, TSpec3> >
 {
-    typedef Pair<uint32_t, uint16_t, Pack> Type;
-};
-
-// Dna Sequences might be longer (chromosomes, genomes)
-template<typename TSpec1, typename TSpec2>
-struct SAValue<StringSet<String<Dna5, TSpec1>, TSpec2> >
-{
-    typedef Pair<uint32_t, uint32_t, Pack> Type;
+    typedef Pair<SizeTypeNum_<TSpec1>, SizeTypePos_<TSpec1>, Pack> Type;
 };
 
 template <typename TString, typename TSpec>
@@ -536,7 +553,11 @@ parseCommandLine(LambdaOptions & options, int argc, char const ** argv)
         "Blast Operation Mode.",
         ArgParseArgument::STRING,
         "STR"));
+#ifdef FASTBUILD
+    setValidValues(parser, "program", "blastp blastx");
+#else
     setValidValues(parser, "program", "blastn blastp blastx tblastn tblastx");
+#endif
     setDefaultValue(parser, "program", "blastx");
 
 //     addOption(parser, ArgParseOption("qa", "query-alphabet",
@@ -684,8 +705,8 @@ parseCommandLine(LambdaOptions & options, int argc, char const ** argv)
     addSection(parser, "Scoring");
 
     addOption(parser, ArgParseOption("sc", "scoring-scheme",
-        "'62' for Blosum62 (default); '50' for Blosum50; '0' for manual "
-        "(default for BlastN)",
+        "'45' for Blosum45; '62' for Blosum62 (default);  '80' for Blosum80; "
+        "[ignored for BlastN]",
         ArgParseArgument::INTEGER));
     setDefaultValue(parser, "scoring-scheme", "62");
     setAdvanced(parser, "scoring-scheme");
@@ -703,13 +724,13 @@ parseCommandLine(LambdaOptions & options, int argc, char const ** argv)
     setAdvanced(parser, "score-gap-open");
 
     addOption(parser, ArgParseOption("ma", "score-match",
-        "Match score (BLASTN or manual scoring)",
+        "Match score [only BLASTN])",
         ArgParseArgument::INTEGER));
     setDefaultValue(parser, "score-match", "2");
     setAdvanced(parser, "score-match");
 
     addOption(parser, ArgParseOption("mi", "score-mismatch",
-        "Mismatch score (BLASTN or manual scoring)",
+        "Mismatch score [only BLASTN]",
         ArgParseArgument::INTEGER));
     setDefaultValue(parser, "score-mismatch", "-3");
     setAdvanced(parser, "score-mismatch");
@@ -1416,6 +1437,12 @@ printOptions(LambdaOptions const & options)
     #endif
               << "  mmapped_db:               "
     #if defined(LAMBDA_MMAPPED_DB)
+              << "on\n"
+    #else
+              << "off\n"
+    #endif
+              << "  lingaps_opt:              "
+    #if defined(LAMBDA_LINGAPS_OPT)
               << "on\n"
     #else
               << "off\n"

@@ -238,7 +238,6 @@ _initHelper(T &, T2 && t2)
 }
 
 template <typename TRedAlph_,
-          typename TScoreScheme_,
           typename TIndexSpec_,
           typename TFileFormat,
           BlastProgram p,
@@ -247,6 +246,7 @@ class GlobalDataHolder
 {
 public:
     using TRedAlph       = RedAlph<p, TRedAlph_>; // ensures == Dna5 for BlastN
+    using TMatch         = Match<TRedAlph>;
 
     static constexpr BlastProgram blastProgram  = p;
     static constexpr bool indexIsFM             = std::is_same<TIndexSpec_, TFMIndex<>>::value;
@@ -300,7 +300,10 @@ public:
     using TDbIndex      = Index<typename std::remove_reference<TRedSubjSeqs>::type, TIndexSpec>;
 
     /* output file */
-    using TScoreScheme  = TScoreScheme_;
+    using TScoreScheme  = std::conditional_t<std::is_same<TRedAlph, Dna5>::value,
+                                             Score<int, Simple>,
+                                             Score<int, ScoreMatrix<AminoAcid, ScoreSpecSelectable>>>;
+//     using TScoreScheme  = TScoreScheme_;
     using TIOContext    = BlastIOContext<TScoreScheme, p, h>;
     using TFile         = FormattedFile<TFileFormat, Output, TIOContext>;
     using TBamFile      = FormattedFile<Bam, Output, BlastTabular>;
@@ -373,8 +376,7 @@ public:
 // struct LocalDataHolder  -- one object per thread
 // ----------------------------------------------------------------------------
 
-template <typename TMatch,
-          typename TGlobalHolder_,
+template <typename TGlobalHolder_,
           typename TScoreExtension>
 class LocalDataHolder
 {
@@ -383,6 +385,7 @@ public:
     using TRedQrySeq    = typename Value<typename std::remove_reference<typename TGlobalHolder::TRedQrySeqs>::type>::Type;
     using TSeeds        = StringSet<typename Infix<TRedQrySeq const>::Type>;
     using TSeedIndex    = Index<TSeeds, IndexSa<>>;
+    using TMatch        = typename TGlobalHolder::TMatch;
 
 
     // references to global stuff
@@ -402,8 +405,8 @@ public:
     TSeedIndex          seedIndex;
 //     std::forward_list<TMatch>   matches;
     std::vector<TMatch>   matches;
-    std::vector<typename Match::TQId>   seedRefs;  // mapping seed -> query
-    std::vector<uint16_t>               seedRanks; // mapping seed -> relative rank
+    std::vector<typename TMatch::TQId> seedRefs;  // mapping seed -> query
+    std::vector<typename TMatch::TPos> seedRanks; // mapping seed -> relative rank
 
     // regarding extension
     using TAlignRow0 = Gaps<typename Infix<typename Value<typename TGlobalHolder::TTransQrySeqs>::Type>::Type,

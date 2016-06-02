@@ -54,15 +54,13 @@ using namespace seqan;
 // ============================================================================
 
 template <typename TRedAlph_,
-          typename TScoreScheme_,
           typename TIndexSpec_,
           typename TFileFormat,
           BlastProgram p,
           BlastTabularSpec h>
 class GlobalDataHolder;
 
-template <typename TMatch,
-          typename TGlobalHolder_,
+template <typename TGlobalHolder_,
           typename TScoreExtension>
 class LocalDataHolder;
 
@@ -108,11 +106,10 @@ struct Comp :
 template <BlastTabularSpec h,
           BlastProgram p,
           typename TRedAlph,
-          typename TScoreScheme,
           typename TIndexSpec,
           typename TOutFormat>
 inline void
-prepareScoringMore(GlobalDataHolder<TRedAlph, TScoreScheme,TIndexSpec, TOutFormat, p, h>  & globalHolder,
+prepareScoringMore(GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h>  & globalHolder,
                    LambdaOptions                                                    const & options,
                    std::true_type                                                   const & /**/)
 {
@@ -123,30 +120,50 @@ prepareScoringMore(GlobalDataHolder<TRedAlph, TScoreScheme,TIndexSpec, TOutForma
 template <BlastTabularSpec h,
           BlastProgram p,
           typename TRedAlph,
-          typename TScoreScheme,
           typename TIndexSpec,
           typename TOutFormat>
 inline void
-prepareScoringMore(GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h> & /*globalHolder*/,
-                   LambdaOptions                                                    const & /*options*/,
+prepareScoringMore(GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h> & globalHolder,
+                   LambdaOptions                                                    const & options,
                    std::false_type                                                  const & /**/)
 {
+    switch (options.scoringMethod)
+    {
+//         case 0:
+//             return argConv3(options, TOutFormat(), Th(), Tp(), TRedAlph(), Score<int, Simple>());
+        case 45:
+            setScoreMatrixById(context(globalHolder.outfile).scoringScheme._internalScheme,
+                               AminoAcidScoreMatrixID::BLOSUM45);
+            break;
+        case 62:
+            setScoreMatrixById(context(globalHolder.outfile).scoringScheme._internalScheme,
+                               AminoAcidScoreMatrixID::BLOSUM62);
+            break;
+        case 80:
+            setScoreMatrixById(context(globalHolder.outfile).scoringScheme._internalScheme,
+                               AminoAcidScoreMatrixID::BLOSUM80);
+            break;
+        default:
+            break;
+    }
 }
 
 template <BlastTabularSpec h,
           BlastProgram p,
           typename TRedAlph,
-          typename TScoreScheme,
           typename TIndexSpec,
           typename TOutFormat>
 inline int
-prepareScoring(GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h> & globalHolder,
+prepareScoring(GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h> & globalHolder,
                LambdaOptions                                                    const & options)
 {
+    using TGlobalHolder = GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h>;
+    prepareScoringMore(globalHolder,
+                       options,
+                       std::is_same<typename TGlobalHolder::TScoreScheme, Score<int, Simple>>());
+
     setScoreGapOpenBlast(context(globalHolder.outfile).scoringScheme, options.gapOpen);
     setScoreGapExtend(context(globalHolder.outfile).scoringScheme, options.gapExtend);
-
-    prepareScoringMore(globalHolder, options, std::is_same<TScoreScheme, Score<int, Simple>>());
 
     if (!isValid(context(globalHolder.outfile).scoringScheme))
     {
@@ -164,14 +181,13 @@ prepareScoring(GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, 
 template <BlastTabularSpec h,
           BlastProgram p,
           typename TRedAlph,
-          typename TScoreScheme,
           typename TIndexSpec,
           typename TOutFormat>
 inline int
-loadSubjects(GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h> & globalHolder,
+loadSubjects(GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h> & globalHolder,
              LambdaOptions                                                    const & options)
 {
-    using TGH = GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h>;
+    using TGH = GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h>;
 
     double start, finish;
     std::string strIdent;
@@ -322,11 +338,10 @@ loadDbIndexFromDisk(TGlobalHolder       & globalHolder,
 template <BlastTabularSpec h,
           BlastProgram p,
           typename TRedAlph,
-          typename TScoreScheme,
           typename TIndexSpec,
           typename TOutFormat>
 inline int
-loadSegintervals(GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h>     & globalHolder,
+loadSegintervals(GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h>     & globalHolder,
                  LambdaOptions                                            const & options)
 {
 
@@ -469,14 +484,13 @@ loadQueryImplTrans(TCDStringSet<String<TransAlph<BlastProgram::BLASTP>, TSpec1>>
 template <BlastTabularSpec h,
           BlastProgram p,
           typename TRedAlph,
-          typename TScoreScheme,
           typename TIndexSpec,
           typename TOutFormat>
 inline int
-loadQuery(GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h> & globalHolder,
+loadQuery(GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h> & globalHolder,
           LambdaOptions                                                    const & options)
 {
-    using TGH = GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h>;
+    using TGH = GlobalDataHolder<TRedAlph, TIndexSpec, TOutFormat, p, h>;
     double start = sysTime();
 
     std::string strIdent = "Loading Query Sequences and Ids...";
@@ -516,16 +530,30 @@ loadQuery(GlobalDataHolder<TRedAlph, TScoreScheme, TIndexSpec, TOutFormat, p, h>
     double finish = sysTime() - start;
     myPrint(options, 1, " done.\n");
 
-    if (options.verbosity >= 2)
+    unsigned long maxLen = 0ul;
+    for (auto const & s : globalHolder.qrySeqs)
+        if (length(s) > maxLen)
+            maxLen = length(s);
+
+    myPrint(options, 2, "Runtime: ", finish, "s \n",
+            "Number of effective query sequences: ",
+            length(globalHolder.qrySeqs), "\nLongest query sequence: ",
+            maxLen, "\n\n");
+
+    if (length(globalHolder.qrySeqs) >= std::numeric_limits<typename TGH::TMatch::TQId>::max())
     {
-        unsigned long maxLen = 0ul;
-        for (auto const & s : globalHolder.qrySeqs)
-            if (length(s) > maxLen)
-                maxLen = length(s);
-        myPrint(options, 2, "Runtime: ", finish, "s \n",
-                "Number of effective query sequences: ",
-                length(globalHolder.qrySeqs), "\nLongest query sequence: ",
-                maxLen, "\n\n");
+        std::cerr << "ERROR: Too many sequences submitted. The maximum (including frames) is "
+                  << std::numeric_limits<typename TGH::TMatch::TQId>::max()
+                  << ".\n";
+        return -1;
+    }
+
+    if (maxLen >= std::numeric_limits<typename TGH::TMatch::TPos>::max())
+    {
+        std::cerr << "ERROR: one or more of your query sequences are too long. "
+                  << "The maximum length is " << std::numeric_limits<typename TGH::TMatch::TPos>::max()
+                  << ".\n";
+        return -1;
     }
     return 0;
 }
@@ -631,13 +659,11 @@ generateTrieOverSeeds(TLocalHolder & lH)
 // perform a fast local alignment score calculation on the seed and see if we
 // reach above threshold
 // WARNING the following function only works for hammingdistanced seeds
-template <typename TMatch,
-          typename TGlobalHolder,
+template <typename TGlobalHolder,
           typename TScoreExtension>
 inline bool
-seedLooksPromising(
-            LocalDataHolder<TMatch, TGlobalHolder, TScoreExtension> const & lH,
-            TMatch const & m)
+seedLooksPromising(LocalDataHolder<TGlobalHolder, TScoreExtension> const & lH,
+                   typename TGlobalHolder::TMatch const & m)
 {
     // no pre-scoring, but still filter out XXX and NNN hits
 //     if (!lH.options.preScoring))
@@ -709,25 +735,30 @@ seedLooksPromising(
 // Function onFind()
 // --------------------------------------------------------------------------
 
-template <typename TMatch,
-          typename TGlobalHolder,
+template <typename TGlobalHolder,
           typename TScoreExtension,
           typename TSeedId,
           typename TSubjOcc>
 inline void
-onFind(LocalDataHolder<TMatch, TGlobalHolder, TScoreExtension> & lH,
-           TSeedId const & seedId,
-           TSubjOcc subjOcc)
+onFind(LocalDataHolder<TGlobalHolder, TScoreExtension> & lH,
+       TSeedId const & seedId,
+       TSubjOcc subjOcc)
 {
+    using TMatch = typename TGlobalHolder::TMatch;
+    SEQAN_ASSERT_LEQ_MSG(getSeqOffset(subjOcc) + lH.options.seedLength,
+                         length(lH.gH.subjSeqs[getSeqNo(subjOcc)]),
+                         "ERROR: Seed reaches beyond end of subject sequence! Please report a bug with your files at "
+                         "http://www.seqan.de/lambda !");
+
     if (TGlobalHolder::indexIsFM) // positions are reversed
         setSeqOffset(subjOcc,
                      length(lH.gH.subjSeqs[getSeqNo(subjOcc)])
                      - getSeqOffset(subjOcc)
                      - lH.options.seedLength);
 
-    Match m {static_cast<Match::TQId>(lH.seedRefs[seedId]),
-             static_cast<Match::TSId>(getSeqNo(subjOcc)),
-             static_cast<Match::TPos>(lH.seedRanks[seedId] * lH.options.seedOffset),
+    TMatch m{static_cast<typename TMatch::TQId>(lH.seedRefs[seedId]),
+             static_cast<typename TMatch::TSId>(getSeqNo(subjOcc)),
+             static_cast<typename TMatch::TPos>(lH.seedRanks[seedId] * lH.options.seedOffset),
              static_cast<Match::TPos>(lH.seedRanks[seedId] * lH.options.seedOffset + lH.options.seedLength),
              static_cast<Match::TPos>(getSeqOffset(subjOcc)),
              static_cast<Match::TPos>(getSeqOffset(subjOcc) + lH.options.seedLength)};
@@ -1083,9 +1114,12 @@ template <typename TBlastMatch,
           typename TLocalHolder>
 inline int
 computeBlastMatch(TBlastMatch         & bm,
-                  Match         const & m,
+                  typename TLocalHolder::TMatch const & m,
                   TLocalHolder        & lH)
 {
+    using TMatch = typename TLocalHolder::TMatch;
+    using TPos   = typename TMatch::TPos;
+
     const unsigned long qryLength = length(value(lH.gH.qrySeqs, m.qryId));
 
     SEQAN_ASSERT_LEQ(bm.qStart, bm.qEnd);
@@ -1118,9 +1152,9 @@ computeBlastMatch(TBlastMatch         & bm,
 //     double         seedE = 0;
 //     double         seedB = 0;
 
-    unsigned row0len = bm.qEnd - bm.qStart;
-    unsigned row1len = bm.sEnd - bm.sStart;
-    unsigned short band = (!lH.options.hammingOnly) * (lH.options.maxSeedDist);
+    TPos row0len = bm.qEnd - bm.qStart;
+    TPos row1len = bm.sEnd - bm.sStart;
+    TPos band = (!lH.options.hammingOnly) * (lH.options.maxSeedDist);
 
 //     // TODO FIGURE THIS OUT
 //     if ((row0len > (lH.options.seedLength + band)) ||
@@ -1135,7 +1169,7 @@ computeBlastMatch(TBlastMatch         & bm,
 
     auto seedsInSeed = std::max(row0len, row1len) / lH.options.seedLength;
 
-    unsigned short maxDist =  0;
+    TPos  maxDist =  0;
     if (lH.options.maxSeedDist <= 1)
         maxDist = std::abs(int(row1len) - int(row0len));
     else
@@ -1457,11 +1491,13 @@ inline int
 iterateMatches(TLocalHolder & lH)
 {
     using TGlobalHolder = typename TLocalHolder::TGlobalHolder;
-    using TPos          = uint32_t; //typename Match::TPos;
+//     using TMatch        = typename TGlobalHolder::TMatch;
+//     using TPos          = typename TMatch::TPos;
+    using TBlastPos     = uint32_t; //TODO why can't this be == TPos
     using TBlastMatch   = BlastMatch<
                            typename TLocalHolder::TAlignRow0,
                            typename TLocalHolder::TAlignRow1,
-                           TPos,
+                           TBlastPos,
                            typename Value<typename TGlobalHolder::TQryIds>::Type,// const &,
                            typename Value<typename TGlobalHolder::TSubjIds>::Type// const &,
                            >;
