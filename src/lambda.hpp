@@ -1044,13 +1044,17 @@ computeBlastMatch(TBlastMatch         & bm,
     } else
     {
         // compute with DP-code
-//         scr = localAlignment(bm.align, seqanScheme(context(lH.gH.outfile).scoringScheme), -maxDist, +maxDist);
-        scr = localAlignment2(bm.alignRow0,
-                              bm.alignRow1,
-                              seqanScheme(context(lH.gH.outfile).scoringScheme),
-                              -maxDist,
-                              +maxDist,
-                              lH.alignContext);
+        scr = localAlignment(bm.alignRow0,
+                             bm.alignRow1,
+                             seqanScheme(context(lH.gH.outfile).scoringScheme),
+                             -maxDist,
+                             +maxDist);
+//         scr = localAlignment2(bm.alignRow0,
+//                               bm.alignRow1,
+//                               seqanScheme(context(lH.gH.outfile).scoringScheme),
+//                               -maxDist,
+//                               +maxDist,
+//                               lH.alignContext);
     }
 
     // save new bounds of alignment
