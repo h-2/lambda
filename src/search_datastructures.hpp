@@ -499,9 +499,9 @@ public:
     using TMatch        = typename TGlobalHolder::TMatch;
     using TScoreExtension = seqan::AffineGaps;
     using TSeqInfix0     = decltype(std::declval<seqan3::reference_t<typename TGlobalHolder::TTransQrySeqs>>()
-                                   | seqan3::views::slice(0, 1));
+                                   | ranges::views::slice(0, 1));
     using TSeqInfix1     = decltype(std::declval<seqan3::reference_t<typename TGlobalHolder::TTransSbjSeqs>>()
-                                   | seqan3::views::slice(0, 1));
+                                   | ranges::views::slice(0, 1));
 
 
     // references to global stuff

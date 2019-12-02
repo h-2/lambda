@@ -473,9 +473,9 @@ seedLooksPromising(LocalDataHolder<TGlobalHolder> const & lH,
     }
 
     auto const & qSeq = lH.gH.transQrySeqs[m.qryId]
-                      | seqan3::views::slice(effectiveQBegin, effectiveQBegin + effectiveLength);
+                      | ranges::views::slice(effectiveQBegin, static_cast<int64_t>(effectiveQBegin + effectiveLength));
     auto const & sSeq = lH.gH.transSbjSeqs[m.subjId]
-                      | seqan3::views::slice(effectiveSBegin, effectiveSBegin + effectiveLength);
+                      | ranges::views::slice(effectiveSBegin, static_cast<int64_t>(effectiveSBegin + effectiveLength));
 
     int             s = 0;
     int      maxScore = 0;
@@ -523,7 +523,7 @@ search(LocalDataHolder<TGlobalHolder> & lH)
             if (seedBegin > (lH.gH.redQrySeqs[i].size() - lH.options.seedLength))
                 break;
 
-            auto results = seqan3::search(lH.gH.redQrySeqs[i] | seqan3::views::slice(seedBegin, seedBegin + lH.options.seedLength),
+            auto results = seqan3::search(lH.gH.redQrySeqs[i] | ranges::views::slice(seedBegin, seedBegin + lH.options.seedLength),
                                           lH.gH.indexFile.index,
                                           cfg);
 
@@ -721,8 +721,8 @@ _setupAlignInfix(TBlastMatch & bm,
     else
         bm.sStart = 0;
 
-    seqan::assignSource(bm.alignRow0, lH.gH.transQrySeqs[m.qryId] | seqan3::views::slice(bm.qStart, bm.qEnd));
-    seqan::assignSource(bm.alignRow1, lH.gH.transSbjSeqs[m.subjId] | seqan3::views::slice(bm.sStart, bm.sEnd));
+    seqan::assignSource(bm.alignRow0, lH.gH.transQrySeqs[m.qryId] | ranges::views::slice(bm.qStart, bm.qEnd));
+    seqan::assignSource(bm.alignRow1, lH.gH.transSbjSeqs[m.subjId] | ranges::views::slice(bm.sStart, bm.sEnd));
 }
 
 template <typename TBlastMatch,
@@ -789,8 +789,8 @@ _expandAlign(TBlastMatch & bm,
     auto oldSLen = seqan::length(source(bm.alignRow1));
 
     // replace source from underneath without triggereng reset
-    bm.alignRow0._source = lH.gH.transQrySeqs[_untrueQryId(bm, lH)] | seqan3::views::slice(0, std::ranges::size(lH.gH.transQrySeqs[_untrueQryId(bm, lH)]));
-    bm.alignRow1._source = lH.gH.transSbjSeqs[_untrueSubjId(bm, lH)] | seqan3::views::slice(0, std::ranges::size(lH.gH.transSbjSeqs[_untrueSubjId(bm, lH)]));
+    bm.alignRow0._source = lH.gH.transQrySeqs[_untrueQryId(bm, lH)] | ranges::views::slice(0, std::ranges::size(lH.gH.transQrySeqs[_untrueQryId(bm, lH)]));
+    bm.alignRow1._source = lH.gH.transSbjSeqs[_untrueSubjId(bm, lH)] | ranges::views::slice(0, std::ranges::size(lH.gH.transSbjSeqs[_untrueSubjId(bm, lH)]));
 
     // insert fields into array gaps
     if (bm.alignRow0._array[0] == 0)

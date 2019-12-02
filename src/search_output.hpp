@@ -90,7 +90,7 @@ _untranslateSequence(TSequence1                     & target,
 {
     if (qFrameShift >= 0)
     {
-        seqan::copy_range(source | seqan3::views::slice(3 * qStart + std::abs(qFrameShift) - 1,
+        seqan::copy_range(source | ranges::views::slice(3 * qStart + std::abs(qFrameShift) - 1,
                                                        3 * qEnd + std::abs(qFrameShift) - 1)
                                  | seqan3::views::to_char,
                           target);
@@ -98,7 +98,7 @@ _untranslateSequence(TSequence1                     & target,
     }
     else
     {
-         seqan::copy_range(source | seqan3::views::slice(seqan::length(source) - (3 * qEnd + std::abs(qFrameShift) - 1),
+         seqan::copy_range(source | ranges::views::slice(seqan::length(source) - (3 * qEnd + std::abs(qFrameShift) - 1),
                                                         seqan::length(source) - (3 * qStart + std::abs(qFrameShift) - 1))
                                   | seqan3::views::to_char,
                            target);
@@ -543,7 +543,7 @@ myWriteRecord(TLH & lH, TRecord const & record)
                     if (writeSeq)
                     {
                         seqan::copy_range(seqan::source(mIt->alignRow0)
-                                   | seqan3::views::slice(seqan::beginPosition(mIt->alignRow0),
+                                   | ranges::views::slice(seqan::beginPosition(mIt->alignRow0),
                                                          seqan::endPosition(mIt->alignRow0))
                                    | std::views::transform([] (seqan3::dna5 a)
                                      {
@@ -660,7 +660,7 @@ myWriteRecord(TLH & lH, TRecord const & record)
                     seqan::appendTagValue(bamR.tags,
                                           std::get<0>(SamBamExtraTags<>::keyDescPairs[SamBamExtraTags<>::Q_AA_SEQ]),
                                           seqan::source(mIt->alignRow0)
-                                           | seqan3::views::slice(seqan::beginPosition(mIt->alignRow0),
+                                           | ranges::views::slice(seqan::beginPosition(mIt->alignRow0),
                                                                  seqan::endPosition(mIt->alignRow0))
                                            | seqan3::views::to_char,
                                           'Z');
