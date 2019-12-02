@@ -186,7 +186,7 @@ template <DbIndexType   c_dbIndexType,
           AlphabetEnum  c_redAlph>
 void realMain(LambdaIndexerOptions     const & options)
 {
-    index_file<c_dbIndexType, c_origAlph> f;
+    index_file<c_dbIndexType, c_origAlph, c_redAlph> f;
     f.options = options.indexFileOptions;
 
     using TOrigSbjAlph = _alphabetEnumToType<c_origAlph>;
@@ -229,24 +229,24 @@ void realMain(LambdaIndexerOptions     const & options)
                                          seqan3::detail::lazy<TRedAlphModString, TTransSbjSeqs, TRedSbjAlph> > >;
 
     TTransSbjSeqs       transSbjSeqs =
-        initHelper<TTransSbjAlph>(f.seqs, seqan3::view::translate_join, seqan3::view::translate_join);
+        initHelper<TTransSbjAlph>(f.seqs, seqan3::views::translate_join, seqan3::views::translate_join);
     TRedSbjSeqs         redSbjSeqs =
-        initHelper<TRedSbjAlph>(transSbjSeqs, seqan3::view::deep{seqan3::view::convert<TRedSbjAlph>}, seqan3::view::dna_n_to_random);
+        initHelper<TRedSbjAlph>(transSbjSeqs, seqan3::views::deep{seqan3::views::convert<TRedSbjAlph>}, seqan3::views::dna_n_to_random);
 
     if constexpr (c_origAlph != c_transAlph)
     {
-        transSbjSeqs = f.seqs | seqan3::view::translate_join;
+        transSbjSeqs = f.seqs | seqan3::views::translate_join;
     }
 
     if constexpr (c_transAlph != c_redAlph)
     {
         if constexpr (c_transAlph != AlphabetEnum::AMINO_ACID)
         {
-            redSbjSeqs = transSbjSeqs | seqan3::view::dna_n_to_random;
+            redSbjSeqs = transSbjSeqs | seqan3::views::dna_n_to_random;
         }
         else
         {
-            redSbjSeqs = transSbjSeqs | seqan3::view::deep{seqan3::view::convert<TRedSbjAlph>};
+            redSbjSeqs = transSbjSeqs | seqan3::views::deep{seqan3::views::convert<TRedSbjAlph>};
         }
     }
 
